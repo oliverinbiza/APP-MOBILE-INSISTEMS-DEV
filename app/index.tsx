@@ -1,226 +1,202 @@
-import AsyncStorage from "@react-native-async-storage/async-storage"; //para salvar e ler dados localmente
-import { Link } from "expo-router"; //para navegação entre telas
-import React, { useEffect, useState } from "react";
-import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { RoomCard } from "../components/RoomCard"; //componente card de ambiente
+//importa componentes de navegação do expo router
+import { Link, useRouter } from "expo-router";
 
+//importa react e o hook useState para controle de estado
+import React, { useState } from "react";
+
+//importa componentes básicos do react native
+import {
+  Modal, //componente para criação de popups
+  Text, //componente para exibição de texto
+  TouchableOpacity, //componente para botões clicáveis
+  View, //componente base de layout
+} from "react-native";
+
+//componente principal da tela inicial do aplicativo
 export default function Home() {
-  //estados principais da tela
-  const [rooms, setRooms] = useState<string[]>([]); //lista de ambientes
-  const [editing, setEditing] = useState<string | null>(null); //ambiente em edição
-  const [editValue, setEditValue] = useState(""); //valor da edição
-  const [showModal, setShowModal] = useState(false); //controle do modal de novo ambiente
-  const [newRoom, setNewRoom] = useState(""); //nome da novo ambiente
-  const [addError, setAddError] = useState(""); //mensagem de erro ao adicionar
 
-  //carrega ambientes ao iniciar a tela
-  useEffect(() => {
-    loadRooms();
-  }, []);
+  //estado responsável por controlar a visibilidade do modal de importação
+  const [showImportModal, setShowImportModal] = useState(false);
 
-  //função para carregar ambientes do AsyncStorage
-  const loadRooms = async () => {
-    const raw = await AsyncStorage.getItem("rooms");
-    setRooms(raw ? JSON.parse(raw) : []);
-  };
+  //hook para navegação programática entre telas
+  const router = useRouter();
 
-  //função para adicionar novo ambienete
-  const addRoom = async () => {
-    const name = newRoom.trim();
-    if (!name) return setAddError("O nome do ambiente não pode ser vazio.");
-    if (rooms.includes(name)) return setAddError("Esse ambiente já está registrado.");
-
-    const updated = [...rooms, name];
-    await AsyncStorage.setItem("rooms", JSON.stringify(updated));
-    setNewRoom("");
-    setAddError("");
-    setShowModal(false);
-    loadRooms();
-  };
-
-  //função para excluir ambiente com confirmação
-  const deleteRoom = async (room: string) => {
-    Alert.alert("Apagar Ambiente", `Deseja realmente apagar o ambiente "${room}" e seus itens?`, [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Apagar",
-        style: "destructive",
-        onPress: async () => {
-          const updated = rooms.filter((r) => r !== room);
-          await AsyncStorage.setItem("rooms", JSON.stringify(updated));
-          await AsyncStorage.removeItem(`items-${room}`);
-          loadRooms();
-        },
-      },
-    ]);
-  };
-
-  //inicia edição de um ambiente
-  const startEditing = (room: string) => {
-    setEditing(room);
-    setEditValue(room);
-  };
-
-  //salva edição do ambiente
-  const saveEdit = async () => {
-    const newName = editValue.trim();
-    if (!newName) return Alert.alert("Erro", "O nome não pode ser vazio.");
-    if (rooms.includes(newName) && newName !== editing) return Alert.alert("Erro", "Já existe um ambiente com esse nome.");
-
-    const updatedRooms = rooms.map((r) => (r === editing ? newName : r));
-    const rawItems = await AsyncStorage.getItem(`items-${editing}`);
-    if (rawItems) {
-      await AsyncStorage.setItem(`items-${newName}`, rawItems);
-      await AsyncStorage.removeItem(`items-${editing}`);
-    }
-
-    await AsyncStorage.setItem("rooms", JSON.stringify(updatedRooms));
-    setEditing(null);
-    loadRooms();
-  };
-
+  //retorno do layout da tela
   return (
-    <View style={styles.container}>
-      {/*título da tela e botão para adicionar novo ambiente*/}
-      <Text style={styles.title}>Ambientes</Text>
-      <TouchableOpacity style={styles.primaryButton} onPress={() => setShowModal(true)}>
-        <Text style={styles.buttonText}>Novo Ambiente</Text>
-      </TouchableOpacity>
+    //container principal da tela
+    <View
+      style={{
+        flex: 1, //ocupa toda a tela
+        backgroundColor: "#E6F0F2", //cor de fundo
+        padding: 20, //espaçamento interno
+        justifyContent: "space-between", //distribui conteúdo entre topo e rodapé
+      }}
+    >
+      {/*container do conteúdo principal*/}
+      <View>
 
-      {/*modal para adicionar nova ambiente*/}
-      <Modal visible={showModal} transparent animationType="fade" onRequestClose={() => setShowModal(false)}>
-        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPressOut={() => setShowModal(false)}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Adicionar Ambiente</Text>
-            <TextInput
-              placeholder="Nome do Ambiente"
-              value={newRoom}
-              onChangeText={(v) => {
-                setNewRoom(v);
-                setAddError("");
-              }}
-              style={styles.input}
-            />
-            {addError ? <Text style={styles.errorText}>{addError}</Text> : null}
+        {/*título principal da aplicação*/}
+        <Text style={{ fontSize: 26, fontWeight: "bold", marginBottom: 10 }}>
+          Maneje o seu inventário
+        </Text>
 
-            <TouchableOpacity style={styles.primaryButton} onPress={addRoom}>
-              <Text style={styles.buttonText}>Salvar</Text>
-            </TouchableOpacity>
+        {/*texto descritivo da tela*/}
+        <Text style={{ fontSize: 16, opacity: 0.7, marginBottom: 30 }}>
+          Importe listas ou continue uma coleta existente
+        </Text>
 
-            <TouchableOpacity style={styles.redButton} onPress={() => setShowModal(false)}>
-              <Text style={styles.buttonText}>Cancelar</Text>
-            </TouchableOpacity>
-          </View>
+        {/*botão para importar lista*/}
+        <TouchableOpacity
+          //abre o modal de importação ao clicar
+          onPress={() => setShowImportModal(true)}
+          style={{
+            backgroundColor: "#4F7C8A", //cor do botão
+            padding: 16, //tamanho interno
+            borderRadius: 0, //bordas quadradas
+            marginBottom: 12, //espaçamento inferior
+          }}
+        >
+          {/*texto do botão importar lista*/}
+          <Text style={{ color: "#FFF", textAlign: "center", fontSize: 16 }}>
+            Importar Lista
+          </Text>
         </TouchableOpacity>
-      </Modal>
 
-      {/*área de edição de ambiente*/}
-<Modal
-  visible={!!editing}
-  transparent
-  animationType="fade"
-  onRequestClose={() => setEditing(null)}
->
-  <TouchableOpacity
-    style={styles.modalOverlay}
-    activeOpacity={1}
-    onPressOut={() => setEditing(null)}
-  >
-    <View style={styles.modalContent}>
-      <Text style={styles.modalTitle}>Editar Ambiente</Text>
+        {/*link para continuar a coleta*/}
+        <Link href="/rooms" asChild>
+          <TouchableOpacity
+            style={{
+              backgroundColor: "#FFFFFF",
+              padding: 16,
+              borderRadius: 0,
+              marginBottom: 12,
+            }}
+          >
+            {/*texto do botão continuar coleta*/}
+            <Text style={{ textAlign: "center", fontSize: 16 }}>
+              Continuar Coleta
+            </Text>
+          </TouchableOpacity>
+        </Link>
 
-      <TextInput
-        value={editValue}
-        onChangeText={setEditValue}
-        style={styles.input}
-      />
+        {/*botão de relatórios (funcionalidade futura)*/}
+        <TouchableOpacity
+          style={{
+            backgroundColor: "#D9E4E8",
+            padding: 14,
+            borderRadius: 0,
+            marginBottom: 12,
+          }}
+        >
+          {/*texto do botão relatórios*/}
+          <Text style={{ textAlign: "center", fontSize: 16 }}>
+            Relatórios
+          </Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity style={styles.primaryButton} onPress={saveEdit}>
-        <Text style={styles.buttonText}>Salvar</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.redButton} onPress={() => setEditing(null)}>
-        <Text style={styles.buttonText}>Cancelar</Text>
-      </TouchableOpacity>
-    </View>
-  </TouchableOpacity>
-</Modal>
-
-      {/*lista de ambientes*/}
-      <ScrollView style={{ flex: 1, marginTop: 20 }}>
-        {rooms.map((room, i) => (
-          <RoomCard key={i} room={room} onEdit={startEditing} onDelete={deleteRoom} />
-        ))}
-      </ScrollView>
-
-      {/*botão de configurações*/}
-      <View style={{ marginTop: 25 }}>
-        <Link href="/settings" asChild>
-          <TouchableOpacity style={styles.primaryButton}>
-            <Text style={styles.buttonText}>Prosseguir</Text>
+        {/*link para tela de gerenciamento de ambientes*/}
+        <Link href="/rooms" asChild>
+          <TouchableOpacity
+            style={{
+              backgroundColor: "#FFFFFF",
+              padding: 16,
+              borderRadius: 0,
+              marginBottom: 12,
+            }}
+          >
+            {/*texto do botão gerenciar ambientes*/}
+            <Text style={{ textAlign: "center", fontSize: 16 }}>
+              Gerenciar Ambientes
+            </Text>
           </TouchableOpacity>
         </Link>
       </View>
+
+      {/*rodapé da aplicação*/}
+      <View style={{ alignItems: "center", marginBottom: 10 }}>
+        <Text style={{ opacity: 0.5 }}>Inventário • v1.0</Text>
+      </View>
+
+      {/*modal de importação de lista*/}
+      <Modal
+        visible={showImportModal} //controla se o modal está visível
+        transparent //permite fundo transparente
+        animationType="fade" //animação de entrada
+        onRequestClose={() => setShowImportModal(false)} //fecha o modal
+      >
+        {/*overlay escuro por trás do modal*/}
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.4)",
+            justifyContent: "center",
+            padding: 20,
+          }}
+        >
+          {/*conteúdo principal do modal*/}
+          <View
+            style={{
+              backgroundColor: "#FFF",
+              padding: 20,
+              borderRadius: 0,
+            }}
+          >
+            {/*botão de fechar o modal (x)*/}
+            <TouchableOpacity
+              onPress={() => setShowImportModal(false)} //fecha o modal
+              style={{
+                position: "absolute",
+                top: 10,
+                right: 10,
+                padding: 8,
+                zIndex: 10,
+              }}
+            >
+              <Text style={{ fontSize: 18, fontWeight: "bold" }}>✕</Text>
+            </TouchableOpacity>
+
+            {/*título do modal*/}
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "bold",
+                marginBottom: 10,
+              }}
+            >
+              Importar lista
+            </Text>
+
+            {/*texto explicativo do modal*/}
+            <Text style={{ marginBottom: 20, opacity: 0.7 }}>
+              Selecione um arquivo para importar os dados de inventário.
+            </Text>
+
+            {/*botão para avançar para a tela de importação*/}
+            <TouchableOpacity
+              onPress={() => {
+                setShowImportModal(false); //fecha o modal
+                router.push("/import"); //navega para a tela de importação
+              }}
+              style={{
+                backgroundColor: "#4F7C8A",
+                padding: 14,
+                borderRadius: 0,
+              }}
+            >
+              {/*texto do botão carregar arquivo*/}
+              <Text
+                style={{
+                  color: "#FFF",
+                  textAlign: "center",
+                  fontSize: 16,
+                }}
+              >
+                Carregar arquivo
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
-
-//estilos principais da tela
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#f5f5f5" },
-  title: { fontSize: 26, fontWeight: "bold", marginBottom: 20 },
-  card: {
-    backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 12,
-    marginVertical: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 5,
-    elevation: 3,
-  },
-  cardTitle: { fontSize: 18, marginBottom: 10 },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 10,
-    backgroundColor: "#fff",
-  },
-  primaryButton: {
-    backgroundColor: "#3A6F78",
-    padding: 12,
-    borderRadius: 8,
-    alignItems: "center",
-    marginVertical: 5,
-  },
-
-  redButton: {
-    backgroundColor: "#D64545",
-    padding: 12,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 5,
-  },
-
-  buttonText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
-  cancelButton: {
-    backgroundColor: "#eee",
-    padding: 12,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  /*cancelButtonText: { color: "#333", fontSize: 16 }, */
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
-    justifyContent: "center",
-    padding: 20,
-  },
-  modalContent: { backgroundColor: "white", padding: 20, borderRadius: 12 },
-  modalTitle: { fontSize: 20, marginBottom: 10, fontWeight: "bold" },
-  errorText: { color: "red", marginBottom: 10 },
-});

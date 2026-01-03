@@ -98,7 +98,7 @@ export default function RoomPage() {
         style={{
           backgroundColor: "#FFF",
           padding: 20,
-          borderRadius: 15,
+          borderRadius: 0,
           marginBottom: 20,
           shadowColor: "#000",
           shadowOpacity: 0.1,
@@ -114,13 +114,13 @@ export default function RoomPage() {
 
         {/*campo de input para o código*/}
         <TextInput
-          placeholder="Código"
+          placeholder="Nº de Tombamento"
           value={newCode}
           onChangeText={setNewCode}
           style={{
             backgroundColor: "#EFEFEF",
             padding: 12,
-            borderRadius: 10,
+            borderRadius: 0,
             marginBottom: 10,
           }}
         />
@@ -133,7 +133,7 @@ export default function RoomPage() {
           style={{
             backgroundColor: "#EFEFEF",
             padding: 12,
-            borderRadius: 10,
+            borderRadius: 0,
             marginBottom: 10,
           }}
         />
@@ -146,7 +146,7 @@ export default function RoomPage() {
           style={{
             backgroundColor: "#EFEFEF",
             padding: 12,
-            borderRadius: 10,
+            borderRadius: 0,
             marginBottom: 20,
           }}
         />
@@ -156,7 +156,7 @@ export default function RoomPage() {
           style={{
             backgroundColor: "#3A6F78",
             padding: 12,
-            borderRadius: 10,
+            borderRadius: 0,
             alignItems: "center",
           }}
           onPress={addItem}
@@ -184,7 +184,7 @@ export default function RoomPage() {
               style={{
                 backgroundColor: "#FFF",
                 padding: 15,
-                borderRadius: 12,
+                borderRadius: 0,
                 marginBottom: 15,
                 shadowColor: "#000",
                 shadowOpacity: 0.08,
@@ -200,7 +200,7 @@ export default function RoomPage() {
 
               {/*código do item*/}
               <Text style={{ fontSize: 14 }}>
-                Código: {item[0]}
+              Tombamento: {item[0]}
               </Text>
 
               {/*tipo do item*/}
@@ -213,7 +213,7 @@ export default function RoomPage() {
                 style={{
                   backgroundColor: "#D9534F",
                   padding: 10,
-                  borderRadius: 8,
+                  borderRadius: 0,
                   marginTop: 10,
                   alignItems: "center",
                 }}
@@ -232,12 +232,12 @@ export default function RoomPage() {
           style={{
             backgroundColor: "#3A6F78",
             padding: 15,
-            borderRadius: 12,
+            borderRadius: 0,
             alignItems: "center",
             marginTop: 20,
             marginBottom: 40,
           }}
-          onPress={() => router.push("/")}
+          onPress={() => router.push("/rooms")}
         >
           <Text style={{ color: "#FFF", fontSize: 18, fontWeight: "bold" }}>
             Finalizar Sala

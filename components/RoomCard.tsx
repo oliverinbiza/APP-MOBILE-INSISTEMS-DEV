@@ -1,106 +1,142 @@
-import { Link } from "expo-router"; //para navegação entre telas
+//importa o componente link para navegação entre telas usando expo router
+import { Link } from "expo-router";
+
+//importa react e o hook usestate para controle de estado
 import React, { useState } from "react";
+
+//importa componentes visuais do react native
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-export function RoomCard({ room, onEdit, onDelete }) {
-  const [showOptions, setShowOptions] = useState(false); //controle de exibição das opções extras
+//define o tipo das propriedades esperadas pelo componente roomcard
+type RoomCardProps = {
+  room: string; //nome do ambiente
+  onEdit: (room: string) => void; //função para editar ambiente
+  onDelete: (room: string) => void; //função para excluir ambiente
+};
 
+//componente visual que representa um card de ambiente
+export function RoomCard({ room, onEdit, onDelete }: RoomCardProps) {
+
+  //estado que controla a exibição dos botões de editar e excluir
+  const [showOptions, setShowOptions] = useState(false);
+
+  //retorno do layout do card
   return (
+    //container principal do card
     <View style={styles.card}>
-      {/*cabeçalho do card: nome do ambiente e botão de opções*/}
+
+      {/*cabeçalho do card com nome do ambiente e botão de opções*/}
       <View style={styles.header}>
+
+        {/*exibe o nome do ambiente*/}
         <Text style={styles.roomName}>{room}</Text>
+
+        {/*botão de opções (três pontos)*/}
         <TouchableOpacity onPress={() => setShowOptions(!showOptions)}>
-          <Text style={styles.optionsIcon}>=</Text>
+          <Text style={styles.optionsIcon}>•••</Text>
         </TouchableOpacity>
+
       </View>
 
-      {/*botão para abrir ambiente*/}
-      <View style={{ marginTop: 10 }}>
-        <Link href={`/rooms/${room}`} asChild>
-          <TouchableOpacity style={styles.primaryButton}>
-            <Text style={styles.buttonText}>Abrir Ambiente</Text>
-          </TouchableOpacity>
-        </Link>
-      </View>
+      {/*botão para abrir o ambiente*/}
+      <Link href={`/rooms/${room}`} asChild>
+        <TouchableOpacity style={styles.openButton}>
+          <Text style={styles.buttonText}>Abrir Ambiente</Text>
+        </TouchableOpacity>
+      </Link>
 
-      {/*opções extras exibidas ao clicar no botão de opções*/}
+      {/*linha de ações extras exibidas ao clicar nas opções*/}
       {showOptions && (
-        <View style={{ marginTop: 10 }}>
+        <View style={styles.actionsRow}>
+
+          {/*botão para editar o ambiente*/}
           <TouchableOpacity
-            style={[styles.primaryButton, { marginBottom: 10 }]}
+            style={[styles.actionButton, styles.editButton]}
             onPress={() => onEdit(room)}
           >
-            <Text style={styles.buttonText}>Editar Ambiente</Text>
+            <Text style={styles.buttonText}>Editar</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.cancelButton} onPress={() => onDelete(room)}>
-            <Text style={styles.cancelButtonText}>Excluir Ambiente</Text>
+          {/*botão para excluir o ambiente*/}
+          <TouchableOpacity
+            style={[styles.actionButton, styles.deleteButton]}
+            onPress={() => onDelete(room)}
+          >
+            <Text style={styles.buttonText}>Excluir</Text>
           </TouchableOpacity>
+
         </View>
       )}
     </View>
   );
 }
 
-//estilos do card do ambiente
+//objeto de estilos do componente
 const styles = StyleSheet.create({
-  card: { //card branco com bordas arredondadas e sombra
-    backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 5,
-    elevation: 3,
+
+  //estilo do card principal
+  card: {
+    backgroundColor: "#fff", //cor de fundo branca
+    padding: 15, //espaçamento interno
+    borderRadius: 0, //bordas quadradas
+    marginBottom: 12, //espaçamento inferior
+    elevation: 3, //sombra no android
   },
 
-    cardAbrirAmbiente: { //card branco com bordas arredondadas e sombra
-    backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 10,
-    shadowColor: "#3A6F78",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 5,
-    elevation: 3,
+  //estilo do cabeçalho do card
+  header: {
+    flexDirection: "row", //itens em linha
+    justifyContent: "space-between", //espaço entre nome e opções
+    alignItems: "center", //alinhamento vertical
+    marginBottom: 10, //espaçamento inferior
   },
-  header: { //linha do cabeçalho: nome + opções
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+
+  //estilo do texto do nome do ambiente
+  roomName: {
+    fontSize: 18, //tamanho da fonte
+    fontWeight: "bold", //texto em negrito
   },
-  roomName: { //nome do ambiente
-    fontSize: 18,
-    fontWeight: "bold",
+
+  //estilo do ícone de opções
+  optionsIcon: {
+    fontSize: 22, //tamanho do ícone
+    color: "#555", //cor do ícone
   },
-  optionsIcon: { //ícone de opções
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#888",
+
+  //estilo do botão abrir ambiente
+  openButton: {
+    backgroundColor: "#3A6F78", //cor principal
+    padding: 12, //espaçamento interno
+    alignItems: "center", //centraliza o texto
   },
-  primaryButton: { //botão principal (abrir/editar)
-    backgroundColor: "#3A6F78",
-    padding: 12,
-    borderRadius: 8,
-    alignItems: "center",
+
+  //estilo da linha de botões editar e excluir
+  actionsRow: {
+    flexDirection: "row", //botões lado a lado
+    marginTop: 6, //espaçamento superior
   },
-  buttonText: { //texto dos botões principais
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
+
+  //estilo base dos botões de ação
+  actionButton: {
+    flex: 1, //cada botão ocupa metade da largura
+    padding: 12, //espaçamento interno
+    alignItems: "center", //centraliza o texto
   },
-  cancelButton: { //botão de cancelar/excluir
-    backgroundColor: "#D64545",
-    padding: 12,
-    borderRadius: 8,
-    alignItems: "center",
+
+  //estilo específico do botão editar
+  editButton: {
+    backgroundColor: "#3A6F78", //cor principal
+    marginRight: 6, //espaçamento entre os botões
   },
-  cancelButtonText: { //texto do botão cancelar/excluir
-    color: "#ffffffff",
-    fontSize: 16,
+
+  //estilo específico do botão excluir
+  deleteButton: {
+    backgroundColor: "#D64545", //cor vermelha para exclusão
+  },
+
+  //estilo do texto dos botões
+  buttonText: {
+    color: "#fff", //texto branco
+    fontWeight: "bold", //texto em negrito
   },
 });
