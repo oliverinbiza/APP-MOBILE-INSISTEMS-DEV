@@ -1,14 +1,19 @@
 //importacoes
-import { Link, useRouter } from "expo-router";
+import * as DocumentPicker from "expo-document-picker";
+import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 //componente principal
 export default function Home2() {
+  const { fileUri, fileName } = useLocalSearchParams();
+  console.log("Arquivo recebido:", fileUri);
+ 
   //router para navegacao
   const router = useRouter();
 
   return (
+    
     <View
       style={{
         flex: 1,
@@ -18,6 +23,7 @@ export default function Home2() {
       }}
     >
       <View>
+        <Text>Arquivo selecionado: {fileName}</Text>
         <Text style={{ fontSize: 26, fontWeight: "bold", marginBottom: 10 }}>
           Coleta em andamento
         </Text>
@@ -82,8 +88,23 @@ export default function Home2() {
           </TouchableOpacity>
         </Link>
       </View>
+            <TouchableOpacity
+  style={{ backgroundColor: "red", padding: 16, marginBottom: 16 }}
+  onPress={async () => {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: "*/*",
+      copyToCacheDirectory: true,
+    });
+    console.log(result);
+  }}
+>
+  <Text style={{ color: "#FFF", textAlign: "center" }}>TEST PICKER</Text>
+</TouchableOpacity>
 
       <Text style={{ flex: 0.2, opacity: 0.5, textAlign: "center", fontSize: 14 }}>
+        
+        
+        
         INSISTEMS - Inventário Inteligente - v1.0
       </Text>
     </View>

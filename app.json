@@ -41,9 +41,10 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "b7b48f93-ce5b-4131-94d1-6d417d96962e"
+        "projectId": "7d63da5b-9e07-47a6-b19e-3f2eb1dc12ad"
+        
       }
     },
-    "owner": "viniaraujo"
+    
   }
 }

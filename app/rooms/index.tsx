@@ -157,7 +157,7 @@ export default function Home() {
       <View style={{ flex: 0.2, marginTop: 25 }}>
         <Link href="/settings" asChild>
           <TouchableOpacity style={styles.primaryButton}>
-            <Text style={styles.buttonText}>Implementações a posteriori</Text>
+            <Text style={styles.buttonText}>Exportar Inventario</Text>
           </TouchableOpacity>
         </Link>
       </View>

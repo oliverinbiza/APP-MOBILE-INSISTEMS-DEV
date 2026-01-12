@@ -1,8 +1,8 @@
 //importacoes principais
+import * as DocumentPicker from "expo-document-picker";
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Modal, Text, TouchableOpacity, View } from "react-native";
-
 //componente principal
 export default function Home() {
   //controle do modal de importacao
@@ -139,10 +139,36 @@ export default function Home() {
             </Text>
 
             <TouchableOpacity
-              onPress={() => {
-                setShowImportModal(false);
-                router.push("/home2");
-              }}
+              onPress={async () => {
+  setShowImportModal(false);
+
+  const result = await DocumentPicker.getDocumentAsync({
+   type: [
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-excel",
+  "text/csv",
+  "application/vnd.oasis.opendocument.spreadsheet"
+],
+    copyToCacheDirectory: true,
+  });
+
+  if (result.canceled) {
+    console.log("Usuário cancelou o picker");
+    return;
+  }
+
+  console.log("Arquivo selecionado:", result.assets[0].uri);
+
+  // Aqui vai pra tela home2
+  router.push({
+    pathname: "/import",
+    params: {
+      fileUri: result.assets[0].uri,
+      fileName: result.assets[0].name,
+    },
+  });
+}}
+
               style={{
                 backgroundColor: "#3A6F78",
                 padding: 14,
