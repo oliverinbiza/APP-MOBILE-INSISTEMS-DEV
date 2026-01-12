@@ -97,19 +97,21 @@ export default function ImportScreen() {
       }
       
       // 3. IDENTIFICAÇÃO INTELIGENTE DE COLUNAS
-      const limpar = (txt: any) => String(txt || '').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "").trim();
       
-      const nomes = ['NOME', 'ITEM', 'DESCRICAO', 'DESCRIÇÃO', 'BEM', 'PRODUTO', 'DENOMINACAO', 'ESPECIFICACAO'];
-      const tombos = ['TOMBO', 'TOMBAMENTO', 'PATRIMONIO', 'PATRIMÔNIO', 'CODIGO', 'ID', 'PLAQUETA', 'NUMERO'];
-
+      // Função para limpar e normalizar texto para comparação
+      const limpar = (txt: any) => String(txt || '').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "").trim();
+      // Possíveis variações dos nomes das colunas
+      const nomes = ['NOME', 'ITEM', 'DESCRICAO', 'DESCRIÇÃO', 'BEM', 'PRODUTO', 'DENOMINACAO','DENOMINACÃO' ,'ESPECIFICACAO','ESPECIFICACÃO' ];
+      const tombos = ['TOMBO', 'TOMBAMENTO', 'PATRIMONIO', 'PATRIMÔNIO', 'CODIGO', 'ID', 'PLAQUETA', 'NUMERO','NUMERO DO ATIVO', 'ATIVO', 'NÚMERO','NÚMERO DO ATIVO',];
+      // Índices das colunas encontradas
       let idxNome = -1, idxTombo = -1;
       let headerIndex = -1;
-
+    // Procura nas primeiras 20 linhas para encontrar o cabeçalho
       for (let i = 0; i < Math.min(20, fullData.length); i++) {
         const row = fullData[i];
         const tNome = row.findIndex(cell => nomes.includes(limpar(cell)));
         const tTombo = row.findIndex(cell => tombos.includes(limpar(cell)));
-
+    // Se encontrar algum dos dois, marca o índice
         if (tNome !== -1 || tTombo !== -1) {
           if (tNome !== -1) idxNome = tNome;
           if (tTombo !== -1) idxTombo = tTombo;
@@ -121,16 +123,18 @@ export default function ImportScreen() {
           headerIndex = i;
         }
       }
-
+    // Se não encontrou ambos, avisa o usuário
       if (idxNome === -1 || idxTombo === -1) {
-        Alert.alert("Atenção", "Não conseguimos identificar automaticamente as colunas 'Tombo' e 'Nome'. Verifique o cabeçalho do seu Excel.");
+        Alert.alert("Atenção", "Não conseguimos identificar automaticamente as colunas 'Tombamento/Ativo' e 'Nome'. Verifique o cabeçalho do seu Excel.");
         setLoading(false);
         return;
       }
 
-      // 4. EXTRAÇÃO E FORMATAÇÃO DOS DADOS
+  // 4. EXTRAÇÃO E FORMATAÇÃO DOS DADOS
+
+      // Pega todas as linhas abaixo do cabeçalho
       const rows = headerIndex !== -1 ? fullData.slice(headerIndex + 1) : fullData;
-      
+      // Formata os dados extraídos
       const formatted = rows
         .filter(row => Array.isArray(row) && row.some(cell => String(cell).trim() !== ''))
         .map(row => [
@@ -219,7 +223,7 @@ export default function ImportScreen() {
       <ScrollView style={{ marginTop: 20 }}>
         {data.length === 0 ? (
            <Text style={{textAlign: 'center', marginTop: 40, opacity: 0.5}}>
-             {loading ? "Processando e limpando dados antigos..." : "Nenhum dado exibido."}
+             {loading ? "Processando  dados para exibiçao..." : "Nenhum dado exibido."}
            </Text>
         ) : (
            <View>
